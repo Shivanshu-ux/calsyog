@@ -159,6 +159,55 @@ router.post('/:id/reply', protect, async (req, res) => {
         }
 
         const updatedRequest = await request.save();
+
+        // --- Notification & Email Logic ---
+        try {
+            const HelpRequest = await import('../models/HelpRequest.js').then(m => m.default);
+            // Ensure we have user email if we need to send to user
+            let userEmail = request.email; // Fallback to email in request
+
+            if (request.user) {
+                const reqUser = await User.findById(request.user);
+                if (reqUser) userEmail = reqUser.email;
+            }
+
+            const isReplyingToAdmin = senderType === 'user';
+
+            // 1. Create In-App Notification
+            const Notification = await import('../models/Notification.js').then(m => m.default);
+            await Notification.create({
+                recipient: isReplyingToAdmin ? 'Admin' : (request.user ? request.user.toString() : 'Guest'),
+                sender: senderType === 'admin' ? 'Admin' : 'User',
+                type: 'Help',
+                message: `New reply on help request: "${request.subject}"`,
+                relatedId: request._id,
+                onModel: 'HelpRequest'
+            });
+
+            // 2. Send Email
+            if (isReplyingToAdmin) {
+                // Email Admin
+                const sendReplyEmail = await import('../utils/sendReplyEmail.js').then(m => m.default);
+                sendReplyEmail({
+                    toEmail: 'calsyog@gmail.com',
+                    subject: `[New Reply] Help Request: ${request.subject}`,
+                    text: `User replied to help request "${request.subject}".\n\nMessage: ${message}`,
+                    html: `<p>User <b>${request.name}</b> replied to help request <b>${request.subject}</b>.</p><p><b>Message:</b><br/>${message}</p>`
+                });
+            } else {
+                // Email User
+                const sendReplyEmail = await import('../utils/sendReplyEmail.js').then(m => m.default);
+                sendReplyEmail({
+                    toEmail: userEmail,
+                    subject: `[Updates on your Help Request] ${request.subject}`,
+                    text: `Admin replied to your help request.\n\nMessage: ${message}`,
+                    html: `<p>The CalsYog Support Team has replied to your request <b>${request.subject}</b>.</p><p><b>Message:</b><br/>${message}</p>`
+                });
+            }
+        } catch (notifErr) {
+            console.error('Failed to send notification for help reply:', notifErr);
+        }
+
         res.status(201).json(updatedRequest);
 
     } catch (error) {

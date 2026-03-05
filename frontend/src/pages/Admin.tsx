@@ -1,9 +1,17 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Truck, CheckCircle, Package, MessageSquare } from 'lucide-react';
+import { Truck, CheckCircle, Package, MessageSquare, X as CloseIcon, Send } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TicketChat } from '../components/TicketChat';
-import type { Reply } from '../components/TicketChat';
+import type { Reply as TicketReply } from '../components/TicketChat';
+
+interface Reply {
+    sender: string;
+    message: string;
+    createdAt: string;
+    _id?: string;
+}
 
 interface Order {
     _id: string;
@@ -13,6 +21,7 @@ interface Order {
     isDelivered: boolean;
     trackingNumber?: string;
     trackingUrl?: string;
+    replies?: Reply[];
     user: {
         name: string;
         email: string;
@@ -28,6 +37,7 @@ interface Booking {
     phone: string;
     isContacted: boolean;
     createdAt: string;
+    replies?: Reply[];
 }
 
 interface HelpRequest {
@@ -38,7 +48,7 @@ interface HelpRequest {
     description: string;
     isResolved: boolean;
     createdAt: string;
-    replies: Reply[];
+    replies: TicketReply[];
 }
 
 export function Admin() {
@@ -61,6 +71,12 @@ export function Admin() {
     const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
     const [loadingHelp, setLoadingHelp] = useState(true);
     const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+
+    // Chat states
+    const [selectedOrderChat, setSelectedOrderChat] = useState<Order | null>(null);
+    const [selectedBookingChat, setSelectedBookingChat] = useState<Booking | null>(null);
+    const [replyMessage, setReplyMessage] = useState('');
+    const [submitReplyType, setSubmitReplyType] = useState<'order' | 'booking' | null>(null);
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -177,6 +193,44 @@ export function Admin() {
         }
     };
 
+    const handleSendOrderReply = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!replyMessage.trim() || !selectedOrderChat || !user) return;
+
+        setSubmitReplyType('order');
+        try {
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            const { data } = await axios.post(`/api/orders/${selectedOrderChat._id}/reply`, { message: replyMessage }, config);
+
+            setOrders(orders.map(o => o._id === data._id ? data : o));
+            setSelectedOrderChat(data);
+            setReplyMessage('');
+        } catch (error) {
+            console.error('Failed to send reply:', error);
+        } finally {
+            setSubmitReplyType(null);
+        }
+    };
+
+    const handleSendBookingReply = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!replyMessage.trim() || !selectedBookingChat || !user) return;
+
+        setSubmitReplyType('booking');
+        try {
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            const { data } = await axios.post(`/api/bookings/${selectedBookingChat._id}/reply`, { message: replyMessage }, config);
+
+            setBookings(bookings.map(b => b._id === data._id ? data : b));
+            setSelectedBookingChat(data);
+            setReplyMessage('');
+        } catch (error) {
+            console.error('Failed to send reply:', error);
+        } finally {
+            setSubmitReplyType(null);
+        }
+    };
+
     if (!user || !user.isAdmin) return <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">Access Denied. Admins Only.</div>;
     if (loadingOrders || loadingBookings || loadingHelp) return <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center mb-10">Loading Platform Data...</div>;
 
@@ -231,7 +285,7 @@ export function Admin() {
                                         <th scope="col" className="px-6 py-4 text-center">Paid</th>
                                         <th scope="col" className="px-6 py-4 text-center">Delivered</th>
                                         <th scope="col" className="px-6 py-4 text-center">Tracking</th>
-                                        <th scope="col" className="px-6 py-4 text-center">Action</th>
+                                        <th scope="col" className="px-6 py-4 text-center w-48">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -321,21 +375,30 @@ export function Admin() {
                                                 )}
                                             </td>
 
-                                            <td className="px-6 py-4 text-center">
-                                                {!order.isDelivered ? (
+                                            <td className="px-6 py-4 text-center align-middle">
+                                                <div className="flex flex-col gap-2 w-full">
+                                                    {!order.isDelivered ? (
+                                                        <button
+                                                            onClick={() => deliverHandler(order._id)}
+                                                            disabled={deliveringId === order._id}
+                                                            className="bg-primary/20 hover:bg-primary/30 text-white border border-primary/30 px-3 py-1.5 rounded text-[10px] tracking-wider uppercase font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1 w-full"
+                                                        >
+                                                            <Truck className="h-3 w-3" />
+                                                            {deliveringId === order._id ? 'Sending...' : 'Dispatch'}
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-gray-500 text-[10px] italic flex items-center justify-center gap-1 py-1.5 w-full uppercase">
+                                                            <Package className="h-3 w-3" /> Delivered
+                                                        </span>
+                                                    )}
+
                                                     <button
-                                                        onClick={() => deliverHandler(order._id)}
-                                                        disabled={deliveringId === order._id}
-                                                        className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 px-3 py-1.5 rounded text-xs tracking-wider uppercase font-bold transition-all disabled:opacity-50 flex items-center gap-1 mx-auto"
+                                                        onClick={() => { setSelectedOrderChat(order); setReplyMessage(''); }}
+                                                        className="px-3 py-1.5 rounded text-[10px] font-bold tracking-wider uppercase transition-colors border w-full border-blue-500/30 text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 flex justify-center items-center gap-1"
                                                     >
-                                                        <Truck className="h-3 w-3" />
-                                                        {deliveringId === order._id ? 'Sending...' : 'Dispatch'}
+                                                        <MessageSquare className="h-3 w-3" /> Chat ({order.replies?.length || 0})
                                                     </button>
-                                                ) : (
-                                                    <span className="text-gray-500 text-xs italic flex items-center justify-center gap-1">
-                                                        <Package className="h-3 w-3" /> Delivered
-                                                    </span>
-                                                )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -356,32 +419,40 @@ export function Admin() {
                                         <th scope="col" className="px-6 py-4">Submission Date</th>
                                         <th scope="col" className="px-6 py-4">Service Details</th>
                                         <th scope="col" className="px-6 py-4">Lead Contact</th>
-                                        <th scope="col" className="px-6 py-4 text-center">Contacted Status</th>
+                                        <th scope="col" className="px-6 py-4 text-center w-48">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {bookings.map(booking => (
                                         <tr key={booking._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                            <td className="px-6 py-4">{new Date(booking.createdAt).toLocaleString()}</td>
-                                            <td className="px-6 py-4 text-white">
+                                            <td className="px-6 py-4 align-top">{new Date(booking.createdAt).toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-white align-top">
                                                 <span className="font-playfair text-primary text-lg block">{booking.serviceType}</span>
                                                 <span className="text-xs bg-white/10 px-2 py-0.5 rounded tracking-wide uppercase">{booking.classMode}</span>
                                             </td>
-                                            <td className="px-6 py-4 text-white">
+                                            <td className="px-6 py-4 text-white align-top">
                                                 <div className="font-medium">{booking.name}</div>
                                                 <div className="text-xs text-gray-500">{booking.email}</div>
                                                 <div className="text-xs text-primary/80 mt-1 font-mono">{booking.phone}</div>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <button
-                                                    onClick={() => toggleContactStatus(booking._id)}
-                                                    className={`px-4 py-1.5 rounded text-xs font-bold tracking-wider uppercase transition-colors border ${booking.isContacted
-                                                        ? 'border-green-500/30 text-green-500 bg-green-500/10 hover:bg-green-500/20'
-                                                        : 'border-yellow-500/30 text-yellow-500 bg-yellow-500/10 hover:bg-yellow-500/20'
-                                                        }`}
-                                                >
-                                                    {booking.isContacted ? 'Yes, Resolved' : 'Pending Contact'}
-                                                </button>
+                                            <td className="px-6 py-4 text-center align-middle">
+                                                <div className="flex flex-col gap-2 w-full">
+                                                    <button
+                                                        onClick={() => toggleContactStatus(booking._id)}
+                                                        className={`px-4 py-1.5 rounded text-[10px] font-bold tracking-wider uppercase transition-colors border w-full ${booking.isContacted
+                                                            ? 'border-green-500/30 text-green-500 bg-green-500/10 hover:bg-green-500/20'
+                                                            : 'border-yellow-500/30 text-yellow-500 bg-yellow-500/10 hover:bg-yellow-500/20'
+                                                            }`}
+                                                    >
+                                                        {booking.isContacted ? 'Yes, Resolved' : 'Pending Contact'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => { setSelectedBookingChat(booking); setReplyMessage(''); }}
+                                                        className="px-4 py-1.5 rounded text-[10px] font-bold tracking-wider uppercase transition-colors border w-full border-blue-500/30 text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 flex justify-center items-center gap-1"
+                                                    >
+                                                        <MessageSquare className="h-3 w-3" /> Chat ({booking.replies?.length || 0})
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -402,7 +473,7 @@ export function Admin() {
                                         <th scope="col" className="px-6 py-4">Submitted On</th>
                                         <th scope="col" className="px-6 py-4">User Info</th>
                                         <th scope="col" className="px-6 py-4">Problem Context</th>
-                                        <th scope="col" className="px-6 py-4 text-center">Status</th>
+                                        <th scope="col" className="px-6 py-4 text-center w-48">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -418,22 +489,24 @@ export function Admin() {
                                                 <p className="text-xs text-gray-400 whitespace-pre-wrap leading-relaxed">{request.description}</p>
                                             </td>
                                             <td className="px-6 py-4 text-center w-48 align-middle">
-                                                <button
-                                                    onClick={() => setSelectedTicketId(request._id)}
-                                                    className="px-4 py-1.5 rounded text-xs font-bold tracking-wider uppercase transition-colors border w-full border-blue-500/30 text-blue-500 bg-blue-500/10 hover:bg-blue-500/20 mb-2"
-                                                >
-                                                    View Thread
-                                                </button>
+                                                <div className="flex flex-col gap-2 w-full">
+                                                    <button
+                                                        onClick={() => setSelectedTicketId(request._id)}
+                                                        className="px-4 py-1.5 rounded text-[10px] font-bold tracking-wider uppercase transition-colors border w-full border-blue-500/30 text-blue-500 bg-blue-500/10 hover:bg-blue-500/20 flexItems-center justify-center gap-1"
+                                                    >
+                                                        <MessageSquare className="h-3 w-3 inline" /> View Thread ({request.replies?.length || 0})
+                                                    </button>
 
-                                                <button
-                                                    onClick={() => toggleHelpStatus(request._id)}
-                                                    className={`px-4 py-1.5 rounded text-xs font-bold tracking-wider uppercase transition-colors border w-full ${request.isResolved
-                                                        ? 'border-green-500/30 text-green-500 bg-green-500/10 hover:bg-green-500/20'
-                                                        : 'border-yellow-500/30 text-yellow-500 bg-yellow-500/10 hover:bg-yellow-500/20'
-                                                        }`}
-                                                >
-                                                    {request.isResolved ? 'Mark Pending' : 'Mark Resolved'}
-                                                </button>
+                                                    <button
+                                                        onClick={() => toggleHelpStatus(request._id)}
+                                                        className={`px-4 py-1.5 rounded text-[10px] font-bold tracking-wider uppercase transition-colors border w-full ${request.isResolved
+                                                            ? 'border-green-500/30 text-green-500 bg-green-500/10 hover:bg-green-500/20'
+                                                            : 'border-yellow-500/30 text-yellow-500 bg-yellow-500/10 hover:bg-yellow-500/20'
+                                                            }`}
+                                                    >
+                                                        {request.isResolved ? 'Mark Pending' : 'Mark Resolved'}
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -451,7 +524,7 @@ export function Admin() {
 
             </div>
 
-            {/* Ticket Chat Modal */}
+            {/* Help/Complaint Chat Modal */}
             {selectedTicketId && (
                 <TicketChat
                     ticket={{
@@ -463,6 +536,121 @@ export function Admin() {
                     onClose={() => setSelectedTicketId(null)}
                 />
             )}
+
+            {/* Order Chat Modal */}
+            <AnimatePresence>
+                {selectedOrderChat && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col h-[600px] max-h-[80vh]"
+                        >
+                            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
+                                <h3 className="text-lg font-medium text-white">Order #{selectedOrderChat._id.substring(0, 8)} Chat</h3>
+                                <button onClick={() => setSelectedOrderChat(null)} className="text-gray-400 hover:text-white transition-colors">
+                                    <CloseIcon className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                {(selectedOrderChat.replies || []).length === 0 ? (
+                                    <div className="text-center text-gray-500 py-10">No messages yet.</div>
+                                ) : (
+                                    (selectedOrderChat.replies || []).map((reply, idx) => (
+                                        <div key={idx} className={`flex ${reply.sender === 'admin' ? 'justify-end' : 'justify-start'}`}>
+                                            <div className={`max-w-[75%] rounded-2xl px-4 py-3 ${reply.sender === 'admin' ? 'bg-primary text-black rounded-tr-sm' : 'bg-white/10 text-white rounded-tl-sm'}`}>
+                                                <p className="text-sm whitespace-pre-wrap">{reply.message}</p>
+                                                <p className={`text-[10px] mt-1 text-right ${reply.sender === 'admin' ? 'text-black/70' : 'text-gray-400'}`}>
+                                                    {new Date(reply.createdAt).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+
+                            <div className="p-4 border-t border-white/10 bg-black/50">
+                                <form onSubmit={handleSendOrderReply} className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={replyMessage}
+                                        onChange={(e) => setReplyMessage(e.target.value)}
+                                        placeholder="Type reply to customer..."
+                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={!replyMessage.trim() || submitReplyType === 'order'}
+                                        className="bg-primary text-black p-3 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center shrink-0"
+                                    >
+                                        <Send className="h-5 w-5" />
+                                    </button>
+                                </form>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Booking Chat Modal */}
+            <AnimatePresence>
+                {selectedBookingChat && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col h-[600px] max-h-[80vh]"
+                        >
+                            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
+                                <h3 className="text-lg font-medium text-white">Booking: {selectedBookingChat.serviceType} Chat</h3>
+                                <button onClick={() => setSelectedBookingChat(null)} className="text-gray-400 hover:text-white transition-colors">
+                                    <CloseIcon className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                {(selectedBookingChat.replies || []).length === 0 ? (
+                                    <div className="text-center text-gray-500 py-10">No messages yet.</div>
+                                ) : (
+                                    (selectedBookingChat.replies || []).map((reply, idx) => (
+                                        <div key={idx} className={`flex ${reply.sender === 'admin' ? 'justify-end' : 'justify-start'}`}>
+                                            <div className={`max-w-[75%] rounded-2xl px-4 py-3 ${reply.sender === 'admin' ? 'bg-primary text-black rounded-tr-sm' : 'bg-white/10 text-white rounded-tl-sm'}`}>
+                                                <p className="text-sm whitespace-pre-wrap">{reply.message}</p>
+                                                <p className={`text-[10px] mt-1 text-right ${reply.sender === 'admin' ? 'text-black/70' : 'text-gray-400'}`}>
+                                                    {new Date(reply.createdAt).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+
+                            <div className="p-4 border-t border-white/10 bg-black/50">
+                                <form onSubmit={handleSendBookingReply} className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={replyMessage}
+                                        onChange={(e) => setReplyMessage(e.target.value)}
+                                        placeholder="Type reply to lead..."
+                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={!replyMessage.trim() || submitReplyType === 'booking'}
+                                        className="bg-primary text-black p-3 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center shrink-0"
+                                    >
+                                        <Send className="h-5 w-5" />
+                                    </button>
+                                </form>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
         </div>
     );
 }

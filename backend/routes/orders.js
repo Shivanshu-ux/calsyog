@@ -185,4 +185,80 @@ router.put('/:id/tracking', protect, adminAuth, async (req, res) => {
     }
 });
 
+// @desc    Add a reply to an order
+// @route   POST /api/orders/:id/reply
+// @access  Private (User or Admin)
+router.post('/:id/reply', protect, async (req, res) => {
+    try {
+        const { message } = req.body;
+        if (!message) {
+            return res.status(400).json({ message: 'Message is required' });
+        }
+
+        const order = await Order.findById(req.params.id).populate('user', 'name email');
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const isOwner = order.user._id.toString() === req.user._id.toString();
+        const isAdmin = req.user.isAdmin;
+
+        if (!isOwner && !isAdmin) {
+            return res.status(401).json({ message: 'Not authorized to reply to this order' });
+        }
+
+        const senderType = isAdmin ? 'admin' : 'user';
+
+        // Add reply
+        order.replies.push({
+            sender: senderType,
+            message: message
+        });
+
+        const updatedOrder = await order.save();
+
+        // --- Notification & Email Logic ---
+        try {
+            const Notification = await import('../models/Notification.js').then(m => m.default);
+            const isReplyingToAdmin = senderType === 'user';
+
+            // 1. Create In-App Notification
+            await Notification.create({
+                recipient: isReplyingToAdmin ? 'Admin' : order.user._id.toString(),
+                sender: senderType === 'admin' ? 'Admin' : 'User',
+                type: 'Order',
+                message: `New reply on order #${order._id.toString().substring(0, 8)}`,
+                relatedId: order._id,
+                onModel: 'Order'
+            });
+
+            // 2. Send Email
+            const sendReplyEmail = await import('../utils/sendReplyEmail.js').then(m => m.default);
+            if (isReplyingToAdmin) {
+                sendReplyEmail({
+                    toEmail: 'calsyog@gmail.com',
+                    subject: `[New Reply] Order #${order._id.toString().substring(0, 8)}`,
+                    text: `User ${order.user.name} replied to their order.\n\nMessage: ${message}`,
+                    html: `<p>User <b>${order.user.name}</b> replied to order <b>#${order._id}</b>.</p><p><b>Message:</b><br/>${message}</p>`
+                });
+            } else {
+                sendReplyEmail({
+                    toEmail: order.user.email,
+                    subject: `[Updates on your Order] #${order._id.toString().substring(0, 8)}`,
+                    text: `Admin replied to your order.\n\nMessage: ${message}`,
+                    html: `<p>The CalsYog Team has replied to your order <b>#${order._id}</b>.</p><p><b>Message:</b><br/>${message}</p>`
+                });
+            }
+        } catch (notifErr) {
+            console.error('Failed to send notification for order reply:', notifErr);
+        }
+
+        res.status(201).json(updatedOrder);
+
+    } catch (error) {
+        console.error('Reply to order error:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 export default router;

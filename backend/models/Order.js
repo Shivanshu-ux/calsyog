@@ -50,6 +50,13 @@ const orderSchema = new mongoose.Schema({
     trackingUrl: {
         type: String,
     },
+    replies: [
+        {
+            sender: { type: String, required: true }, // 'admin' or 'user'
+            message: { type: String, required: true },
+            createdAt: { type: Date, default: Date.now },
+        }
+    ],
 }, { timestamps: true });
 
 export default mongoose.model('Order', orderSchema);

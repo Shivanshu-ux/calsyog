@@ -21,6 +21,8 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/help', helpRoutes);
+import notificationRoutes from './routes/notifications.js';
+app.use('/api/notifications', notificationRoutes);
 
 // MongoDB Connection
 console.log('Starting MongoDB connection with URI:', process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 20) + '...' : 'undefined');
