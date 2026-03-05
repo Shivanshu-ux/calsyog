@@ -8,7 +8,9 @@ import './index.css'
 import App from './App.tsx'
 
 import axios from 'axios';
-axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL || '/'; // Use relative URLs to allow Vite proxy or env var in production
+if (import.meta.env.VITE_BACKEND_URL) {
+  axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
+}
 
 const GOOGLE_CLIENT_ID = '814018488714-87d3t4dl34tanodc42jm558gqajfdp39.apps.googleusercontent.com'; // Actual client ID
 

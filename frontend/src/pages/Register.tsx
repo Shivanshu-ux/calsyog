@@ -25,7 +25,7 @@ export const Register = () => {
 
     const handleGoogleSuccess = async (credentialResponse: any) => {
         try {
-            const { data } = await axios.post('/api/auth/google', {
+            const { data } = await axios.post('/api/auth/external-login', {
                 token: credentialResponse.credential,
             });
             login(data);

@@ -96,9 +96,9 @@ router.post('/login', async (req, res) => {
 });
 
 // @desc    Google Auth Login/Register
-// @route   POST /api/auth/google
+// @route   POST /api/auth/external-login
 // @access  Public
-router.post('/google', async (req, res) => {
+router.post('/external-login', async (req, res) => {
     try {
         const { token } = req.body;
 
