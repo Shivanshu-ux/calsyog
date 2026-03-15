@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -17,14 +18,18 @@ import { AboutUs } from './pages/AboutUs';
 import { Services } from './pages/Services';
 import { Help } from './pages/Help';
 import { MyTickets } from './pages/MyTickets';
+import { Preloader } from './components/Preloader';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const GOOGLE_CLIENT_ID = '814018488714-87d3t4dl34tanodc42jm558gqajfdp39.apps.googleusercontent.com';
 
 function App() {
+  const [isPreloading, setIsPreloading] = useState(true);
+
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary">
+      {isPreloading && <Preloader onComplete={() => setIsPreloading(false)} />}
+      <div className={`min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary ${isPreloading ? 'h-screen overflow-hidden' : ''}`}>
         <Navbar />
         <main>
           <Routes>
