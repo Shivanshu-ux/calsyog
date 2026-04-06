@@ -9,75 +9,75 @@ import { SectionHeading } from '../components/SectionHeading';
 const products = [
     {
         name: "Elite Gymnastic Rings",
-        price: "₹3,500",
+        price: "₹0.00",
         image: "/ring.png",
         description: "Precision-engineered wooden rings with military-grade straps",
         rating: 5,
-        reviews: 124
+        reviews: 124,
+        available: false
     },
     {
         name: "Serenity Pro Mat",
-        price: "₹4,500",
+        price: "₹0.00",
         image: "/mat.png",
         description: "Eco-luxury cork and natural rubber, 6mm thickness",
         rating: 5,
-        reviews: 89
-    },
-    {
-        name: "Adaptive Resistance System",
-        price: "₹2,500",
-        image: "https://images.unsplash.com/photo-1598289431512-b97b0917affc?q=80&w=2080&auto=format&fit=crop",
-        description: "5-band progressive resistance training kit",
-        rating: 5,
-        reviews: 215
+        reviews: 89,
+        available: false
     },
     {
         name: "Pro Calisthenics Parallettes",
-        price: "₹4,800",
-        image: "/parallets.png",
+        price: "₹1,499",
+        image: "/Posty.jpg",
         description: "Solid wood construction with non-slip base for mastering planches",
         rating: 5,
-        reviews: 156
+        reviews: 156,
+        available: true
     },
     {
         name: "Heavy-Duty Dip Bars",
-        price: "₹8,500",
+        price: "₹0.00",
         image: "/dips.png",
         description: "Adjustable width and height for perfect form and versatility",
         rating: 4,
-        reviews: 94
+        reviews: 94,
+        available: false
     },
     {
         name: "Mounted Pull-Up Bar",
-        price: "₹6,500",
+        price: "₹0.00",
         image: "/Pullup.png",
         description: "Industrial grade steel for explosive muscle ups and hanging leg raises",
         rating: 5,
-        reviews: 203
+        reviews: 203,
+        available: false
     },
     {
         name: "Eco-Cork Yoga Block",
-        price: "₹1,200",
+        price: "₹0.00",
         image: "/block.png",
         description: "High-density natural cork for superior stability and alignment",
         rating: 5,
-        reviews: 42
+        reviews: 42,
+        available: false
     },
     {
         name: "Mobility Stretching Bands",
-        price: "₹900",
+        price: "₹0.00",
         image: "/strech.png",
         description: "Premium latex bands for deep stretching and injury prevention",
         rating: 4,
-        reviews: 67
+        reviews: 67,
+        available: false
     },
     {
         name: "Performance Wrist Wraps",
-        price: "₹600",
+        price: "₹0.00",
         image: "/band.png",
         description: "Heavy-duty support for wrists during intense static holds",
         rating: 5,
-        reviews: 89
+        reviews: 89,
+        available: false
     }
 ];
 
@@ -196,18 +196,25 @@ export function Products() {
                                 <img
                                     src={product.image}
                                     alt={product.name}
-                                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90"
+                                    className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 ${product.available === false ? 'grayscale max-w-full' : ''}`}
                                 />
+                                {product.available === false && (
+                                    <div className="absolute top-4 left-4 bg-red-600/90 text-white text-xs font-bold px-3 py-1 uppercase tracking-wider rounded-sm z-10 backdrop-blur-sm">
+                                        Not Available
+                                    </div>
+                                )}
                                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
                                 <button
                                     onClick={(e) => handleAddToCart(product, e)}
-                                    disabled={adding === product.name || added === product.name}
-                                    className="absolute bottom-0 left-0 w-full py-4 bg-primary text-black font-bold uppercase tracking-widest translate-y-full group-hover:translate-y-0 transition-transform duration-300 disabled:opacity-80 flex items-center justify-center gap-2"
+                                    disabled={adding === product.name || added === product.name || product.available === false}
+                                    className={`absolute bottom-0 left-0 w-full py-4 text-black font-bold uppercase tracking-widest translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2 ${product.available === false ? 'bg-gray-500 cursor-not-allowed opacity-100 disabled:opacity-100' : 'bg-primary disabled:opacity-80'}`}
                                 >
                                     {adding === product.name ? (
                                         'Adding...'
                                     ) : added === product.name ? (
                                         <><CheckCircle className="h-5 w-5" /> Added</>
+                                    ) : product.available === false ? (
+                                        'Out of Stock'
                                     ) : (
                                         'Add to Cart'
                                     )}

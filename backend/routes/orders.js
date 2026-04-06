@@ -68,6 +68,41 @@ router.post('/', protect, async (req, res) => {
                 { $set: { items: [] } }
             );
 
+            // Send Emails
+            try {
+                const sendReplyEmail = await import('../utils/sendReplyEmail.js').then(m => m.default);
+                
+                // Email to User
+                sendReplyEmail({
+                    toEmail: req.user.email,
+                    subject: `Order Confirmation - #${createdOrder._id.toString().substring(0, 8)}`,
+                    text: `Thank you for your order!\nYour order ID is ${createdOrder._id}\nTotal Amount: ₹${createdOrder.totalPrice.toLocaleString('en-IN')}`,
+                    html: `
+                        <h3>Thank you for your order!</h3>
+                        <p>We've received your order and are currently processing it.</p>
+                        <p><b>Order ID:</b> ${createdOrder._id}</p>
+                        <p><b>Total Amount:</b> ₹${createdOrder.totalPrice.toLocaleString('en-IN')}</p>
+                        <p>Log in to your profile to track your order and chat with us if you have any questions.</p>
+                    `
+                });
+
+                // Email to Admin
+                sendReplyEmail({
+                    toEmail: 'calsyog@gmail.com',
+                    subject: `New Order Received - #${createdOrder._id.toString().substring(0, 8)}`,
+                    text: `A new order has been placed by ${req.user.name} (${req.user.email}).\nTotal Amount: ₹${createdOrder.totalPrice.toLocaleString('en-IN')}`,
+                    html: `
+                        <h3>New Order Received</h3>
+                        <p><b>User:</b> ${req.user.name} (${req.user.email})</p>
+                        <p><b>Order ID:</b> ${createdOrder._id}</p>
+                        <p><b>Total Amount:</b> ₹${createdOrder.totalPrice.toLocaleString('en-IN')}</p>
+                        <p>Check the admin dashboard for more details.</p>
+                    `
+                });
+            } catch (err) {
+                console.error('Failed to send order confirmation emails', err);
+            }
+
             res.status(201).json(createdOrder);
         }
     } catch (error) {

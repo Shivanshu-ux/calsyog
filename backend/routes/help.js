@@ -63,10 +63,30 @@ router.post('/', async (req, res) => {
         });
         await helpRequest.save();
 
-        // Send the email asynchronously
+        // Send the email to Admin asynchronously
         sendHelpEmail({ name, email, subject, description }).catch(err => {
-            console.error('Failed to trigger help request email:', err);
+            console.error('Failed to trigger help request email to admin:', err);
         });
+
+        // Send confirmation email to the User asynchronously
+        try {
+            const sendReplyEmail = await import('../utils/sendReplyEmail.js').then(m => m.default);
+            sendReplyEmail({
+                toEmail: email,
+                subject: `Request Received: ${subject}`,
+                text: `Hi ${name},\n\We have received your help request regarding "${subject}".\nOur team will review it and get back to you shortly.\n\nDescription:\n${description}`,
+                html: `
+                    <h3>We've received your request!</h3>
+                    <p>Hi <b>${name}</b>,</p>
+                    <p>This is to confirm that we have received your support request regarding "<b>${subject}</b>".</p>
+                    <p>Our team is reviewing it and will get back to you as soon as possible.</p>
+                    <hr/>
+                    <p><b>Your message:</b><br/>${description}</p>
+                `
+            });
+        } catch (err) {
+            console.error('Failed to trigger help request email to user:', err);
+        }
 
         res.status(200).json({ message: 'Help request submitted successfully' });
     } catch (error) {

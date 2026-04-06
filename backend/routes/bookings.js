@@ -49,6 +49,41 @@ router.post('/', async (req, res) => {
         });
 
         const createdBooking = await booking.save();
+
+        // Send Emails
+        try {
+            const sendReplyEmail = await import('../utils/sendReplyEmail.js').then(m => m.default);
+            
+            // Email to User
+            sendReplyEmail({
+                toEmail: email,
+                subject: `Booking Confirmation - ${serviceType}`,
+                text: `Thank you for booking a ${serviceType} class!\n\nWe have received your request and will contact you shortly at ${phone}.`,
+                html: `
+                    <h3>Booking Received!</h3>
+                    <p>Thank you <b>${name}</b> for booking a <b>${serviceType}</b> class (${classMode}).</p>
+                    <p>We will reach out to you shortly at ${phone} to confirm details.</p>
+                `
+            });
+
+            // Email to Admin
+            sendReplyEmail({
+                toEmail: 'calsyog@gmail.com',
+                subject: `New Service Booking - ${serviceType}`,
+                text: `A new booking has been created by ${name}.\nService: ${serviceType}\nMode: ${classMode}\nPhone: ${phone}\nEmail: ${email}`,
+                html: `
+                    <h3>New Service Booking</h3>
+                    <p><b>Name:</b> ${name}</p>
+                    <p><b>Email:</b> ${email}</p>
+                    <p><b>Phone:</b> ${phone}</p>
+                    <p><b>Service:</b> ${serviceType}</p>
+                    <p><b>Mode:</b> ${classMode}</p>
+                `
+            });
+        } catch (err) {
+            console.error('Failed to send booking confirmation emails', err);
+        }
+
         res.status(201).json(createdBooking);
     } catch (error) {
         console.error('Create booking error:', error);
