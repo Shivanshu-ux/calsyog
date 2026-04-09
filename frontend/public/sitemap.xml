@@ -1,29 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://calsyog.vercel.app/</loc>
-    <lastmod>2026-03-04</lastmod>
+    <loc>https://calsyog.in/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://calsyog.vercel.app/services</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://calsyog.in/products</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://calsyog.vercel.app/products</loc>
+    <loc>https://calsyog.in/services</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://calsyog.vercel.app/about</loc>
+    <loc>https://calsyog.in/learn/calisthenics</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://calsyog.in/learn/yoga</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://calsyog.in/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://calsyog.vercel.app/help</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://calsyog.in/help</loc>
+    <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
 </urlset>

@@ -1,3 +1,11 @@
 User-agent: *
 Allow: /
-Sitemap: https://calsyog.vercel.app/sitemap.xml
+
+# Disallow private or non-essential pages
+Disallow: /admin
+Disallow: /profile
+Disallow: /my-tickets
+Disallow: /checkout
+Disallow: /success
+
+Sitemap: https://calsyog.in/sitemap.xml
