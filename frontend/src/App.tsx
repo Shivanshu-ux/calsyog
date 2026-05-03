@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { SEO } from './components/SEO';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { Collections } from './components/Collections';
@@ -35,6 +36,7 @@ function App() {
           <Routes>
             <Route path="/" element={
               <>
+                <SEO canonical="/" />
                 <Hero />
                 <Collections />
                 <Philosophy />

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { SEO } from '../components/SEO';
 import { useAuth } from '../context/AuthContext';
 import { Truck, CheckCircle, Package, MessageSquare, X as CloseIcon, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -238,6 +239,7 @@ export function Admin() {
 
     return (
         <div className="min-h-screen bg-[#050505] pt-24 pb-12">
+            <SEO title="Admin Dashboard" noindex={true} />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 <div className="mb-12 flex justify-between items-end border-b border-white/10 pb-8">

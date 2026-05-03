@@ -1,9 +1,15 @@
 import { motion } from 'framer-motion';
 import { SectionHeading } from '../components/SectionHeading';
+import { SEO } from '../components/SEO';
 
 export function LearnYoga() {
     return (
         <div className="pt-24 min-h-screen bg-background text-foreground">
+            <SEO 
+                title="Learn Yoga - The Philosophy of Mindfulness" 
+                description="Explore the ancient roots of Yoga, its different styles, core principles, and the incredible benefits it brings to mind and body."
+                canonical="/learn/yoga" 
+            />
             <div className="container mx-auto px-6 py-12">
                 <SectionHeading title="The Philosophy of Yoga" as="h1" />
                 <motion.div

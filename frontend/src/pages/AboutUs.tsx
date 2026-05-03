@@ -1,9 +1,15 @@
 import { motion } from 'framer-motion';
 import { SectionHeading } from '../components/SectionHeading';
+import { SEO } from '../components/SEO';
 
 export function AboutUs() {
     return (
         <div className="pt-24 min-h-screen bg-background text-foreground">
+            <SEO 
+                title="About CalsYog" 
+                description="Discover our mission to elevate human potential by combining the ancient traditions of Yoga with the raw power of Calisthenics."
+                canonical="/about" 
+            />
             <div className="container mx-auto px-6 py-12 max-w-4xl">
                 <SectionHeading title="About Us" as="h1" />
 

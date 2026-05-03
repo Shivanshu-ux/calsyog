@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Package, Truck, CheckCircle, Clock, MapPin, MessageSquare, X as CloseIcon, Send, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SEO } from '../components/SEO';
 
 interface Reply {
     sender: string;
@@ -131,6 +132,7 @@ export function Profile() {
 
     return (
         <div className="min-h-screen bg-[#050505] pt-24 pb-12">
+            <SEO title="Your Profile" noindex={true} />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 <motion.div

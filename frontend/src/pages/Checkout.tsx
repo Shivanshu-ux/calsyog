@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { CreditCard, Wallet, Banknote, ShieldCheck } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { SEO } from '../components/SEO';
 
 export function Checkout() {
     const { user } = useAuth();
@@ -168,6 +169,7 @@ export function Checkout() {
 
     return (
         <div className="min-h-screen bg-[#050505] pt-24 pb-12">
+            <SEO title="Checkout" noindex={true} />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-serif text-white">Secure Checkout</h1>

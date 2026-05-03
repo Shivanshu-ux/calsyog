@@ -1,9 +1,15 @@
 import { motion } from 'framer-motion';
 import { SectionHeading } from '../components/SectionHeading';
+import { SEO } from '../components/SEO';
 
 export function LearnCalisthenics() {
     return (
         <div className="pt-24 min-h-screen bg-background text-foreground">
+            <SEO 
+                title="Learn Calisthenics - Master Your Bodyweight" 
+                description="Discover the core principles, history, and training methods of Calisthenics. Start your journey to absolute body control today."
+                canonical="/learn/calisthenics" 
+            />
             <div className="container mx-auto px-6 py-12">
                 <SectionHeading title="The Art of Calisthenics" as="h1" />
                 <motion.div

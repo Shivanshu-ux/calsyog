@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MapPin, ArrowRight, CheckCircle, RefreshCw } from 'lucide-react';
 import axios from 'axios';
+import { SEO } from '../components/SEO';
 
 type ServiceType = 'Calisthenics' | 'Yoga' | null;
 type ClassMode = 'Online' | 'Offline';
@@ -73,6 +74,11 @@ export function Services() {
 
     return (
         <div className="pt-32 pb-16 min-h-screen bg-background">
+            <SEO 
+                title="Book a Class - Calisthenics & Yoga Services" 
+                description="Book your next online or offline Calisthenics and Yoga session with our expert trainers at CalsYog studios."
+                canonical="/services" 
+            />
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header Sub-section */}
                 <div className="text-center mb-16 animate-fade-in-up">

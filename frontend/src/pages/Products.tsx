@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { motion } from 'framer-motion';
 
 import { SectionHeading } from '../components/SectionHeading';
+import { SEO } from '../components/SEO';
 
 const products = [
     {
@@ -136,6 +137,11 @@ export function Products() {
 
     return (
         <div className="pt-32 pb-24 min-h-screen bg-[#0a0a0a]">
+            <SEO 
+                title="Premium Calisthenics & Yoga Products" 
+                description="Explore our range of premium fitness equipment, rings, mats, and parallettes designed for perfect form and durability."
+                canonical="/products" 
+            />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <SectionHeading
                     title="All Products"

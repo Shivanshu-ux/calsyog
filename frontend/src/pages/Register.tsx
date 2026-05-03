@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { GoogleLogin } from '@react-oauth/google';
+import { SEO } from '../components/SEO';
 
 export const Register = () => {
     const [name, setName] = useState('');
@@ -37,6 +38,7 @@ export const Register = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-background px-4">
+            <SEO title="Create an Account" noindex={true} />
             <div className="max-w-md w-full space-y-8 p-8 border border-primary/20 bg-background/50 backdrop-blur-sm rounded-lg">
                 <div className="text-center">
                     <h2 className="text-3xl font-playfair text-primary">Create an Account</h2>

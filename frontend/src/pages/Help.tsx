@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Mail, MessageSquare, AlertCircle, ArrowRight, CheckCircle, RefreshCw } from 'lucide-react';
 import axios from 'axios';
+import { SEO } from '../components/SEO';
 
 export function Help() {
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', description: '' });
@@ -59,6 +60,11 @@ export function Help() {
 
     return (
         <div className="pt-32 pb-16 min-h-screen bg-background">
+            <SEO 
+                title="Help & Support - CalsYog" 
+                description="Need assistance? Contact our support team for any issues regarding your bookings, orders, or account."
+                canonical="/help" 
+            />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header Sub-section */}
                 <div className="text-center mb-16 animate-fade-in-up">

@@ -12,18 +12,22 @@ if (import.meta.env.VITE_BACKEND_URL) {
   axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 }
 
+import { HelmetProvider } from 'react-helmet-async';
+
 const GOOGLE_CLIENT_ID = '814018488714-87d3t4dl34tanodc42jm558gqajfdp39.apps.googleusercontent.com'; // Actual client ID
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-        <AuthProvider>
-          <CartProvider>
-            <App />
-          </CartProvider>
-        </AuthProvider>
-      </GoogleOAuthProvider>
-    </BrowserRouter>
+    <HelmetProvider>
+      <BrowserRouter>
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+          <AuthProvider>
+            <CartProvider>
+              <App />
+            </CartProvider>
+          </AuthProvider>
+        </GoogleOAuthProvider>
+      </BrowserRouter>
+    </HelmetProvider>
   </StrictMode>,
 )
