@@ -1,4 +1,4 @@
-import { ShoppingBag, Menu, X, User as UserIcon, LogOut, ShieldAlert, MessageSquare, Bell } from 'lucide-react';
+import { ShoppingBag, User as UserIcon, LogOut, ShieldAlert, MessageSquare, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -17,7 +17,7 @@ interface Notification {
 }
 
 export function Navbar() {
-    const [isOpen, setIsOpen] = useState(false);
+export function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -89,8 +89,8 @@ export function Navbar() {
             scrolled ? "bg-background/90 backdrop-blur-md border-b border-white/5 py-4" : "bg-transparent py-6"
         )}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between">
-                    <div className="flex-shrink-0">
+                <div className="flex items-center justify-center md:justify-between w-full">
+                    <div className="flex-shrink-0 flex items-center justify-center md:justify-start">
                         <Link to="/">
                             <img src="/d.png" alt="CALSYOG" className="h-16 w-auto" />
                         </Link>
@@ -199,46 +199,9 @@ export function Navbar() {
                         )}
                     </div>
 
-                    <div className="flex md:hidden">
-                        <button
-                            onClick={() => setIsOpen(!isOpen)}
-                            className="text-foreground hover:text-primary transition-colors"
-                        >
-                            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                        </button>
                     </div>
                 </div>
             </div>
-
-            {/* Mobile menu */}
-            {isOpen && (
-                <div className="md:hidden bg-background border-b border-white/5 absolute w-full">
-                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col items-center py-8">
-                        <a href="/" onClick={() => setIsOpen(false)} className="text-foreground hover:text-primary block px-3 py-4 text-base font-medium uppercase tracking-widest border-b border-white/5 w-full text-center">Home</a>
-                        <Link to="/services" onClick={() => setIsOpen(false)} className="text-foreground hover:text-primary block px-3 py-4 text-base font-medium uppercase tracking-widest border-b border-white/5 w-full text-center">Services</Link>
-                        <Link to="/products" onClick={() => setIsOpen(false)} className="text-foreground hover:text-primary block px-3 py-4 text-base font-medium uppercase tracking-widest border-b border-white/5 w-full text-center">Products</Link>
-                        <Link to="/help" onClick={() => setIsOpen(false)} className="text-foreground hover:text-primary block px-3 py-4 text-base font-medium uppercase tracking-widest border-b border-white/5 w-full text-center">Help</Link>
-                        <a href="#contact" onClick={() => setIsOpen(false)} className="text-foreground hover:text-primary block px-3 py-4 text-base font-medium uppercase tracking-widest border-b border-white/5 w-full text-center">Contact</a>
-                        {user ? (
-                            <>
-                                <Link to="/my-tickets" onClick={() => setIsOpen(false)} className="text-foreground hover:text-primary flex items-center justify-center space-x-2 px-3 py-4 text-base font-medium uppercase tracking-widest w-full text-center">
-                                    <MessageSquare className="h-5 w-5" />
-                                    <span>Tickets</span>
-                                </Link>
-                                <button onClick={() => { logout(); setIsOpen(false); }} className="text-foreground hover:text-primary flex items-center justify-center space-x-2 px-3 py-4 text-base font-medium uppercase tracking-widest w-full text-center border-t border-white/5">
-                                    <LogOut className="h-5 w-5" />
-                                    <span>Logout</span>
-                                </button>
-                            </>
-                        ) : (
-                            <Link to="/login" onClick={() => setIsOpen(false)} className="text-foreground hover:text-primary flex items-center justify-center space-x-2 px-3 py-4 text-base font-medium uppercase tracking-widest w-full text-center">
-                                <UserIcon className="h-5 w-5" />
-                                <span>Login</span>
-                            </Link>
-                        )}
-                    </div>
-                </div>
-            )}
 
             {/* Cart Sidebar */}
             <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />

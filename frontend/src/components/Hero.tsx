@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 export function Hero() {
     return (
-        <div className="relative h-screen min-h-[800px] flex items-center justify-center overflow-hidden">
+        <div className="relative h-[100svh] min-h-[600px] md:h-screen md:min-h-[800px] flex items-center justify-center overflow-hidden">
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
                 <img
@@ -20,10 +20,10 @@ export function Hero() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
                 >
-                    <h2 className="text-2xl md:text-4xl font-serif font-medium text-primary mb-6 tracking-[0.4em] uppercase" style={{ textShadow: "0 2px 10px rgba(212,175,55,0.3)" }}>
+                    <h2 className="text-xl md:text-4xl font-serif font-medium text-primary mb-4 md:mb-6 tracking-[0.4em] uppercase" style={{ textShadow: "0 2px 10px rgba(212,175,55,0.3)" }}>
                         CalsYog
                     </h2>
-                    <h1 className="text-5xl md:text-8xl font-serif font-bold text-foreground mb-8 tracking-tight leading-tight">
+                    <h1 className="text-5xl md:text-8xl font-serif font-bold text-foreground mb-6 md:mb-8 tracking-tight leading-tight">
                         Elevate Your Body & <br />
                         <span className="italic font-light">Soul</span>
                     </h1>

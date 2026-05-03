@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { SEO } from './components/SEO';
 import { Navbar } from './components/Navbar';
+import { MobileNav } from './components/MobileNav';
 import { Hero } from './components/Hero';
 import { Collections } from './components/Collections';
 import { Philosophy } from './components/Philosophy';
@@ -32,7 +33,7 @@ function App() {
       {isPreloading && <Preloader onComplete={() => setIsPreloading(false)} />}
       <div className={`min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary ${isPreloading ? 'h-screen overflow-hidden' : ''}`}>
         <Navbar />
-        <main>
+        <main className="pb-16 md:pb-0">
           <Routes>
             <Route path="/" element={
               <>
@@ -58,6 +59,7 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        <MobileNav />
       </div>
     </GoogleOAuthProvider>
   );
