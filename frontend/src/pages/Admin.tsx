@@ -27,6 +27,25 @@ interface Order {
         name: string;
         email: string;
     };
+    shippingAddress?: {
+        address: string;
+        city: string;
+        postalCode: string;
+        country: string;
+    };
+    paymentMethod?: string;
+    paymentDetails?: {
+        transactionId?: string;
+        cardNumberLast4?: string;
+        bank?: string;
+    };
+    orderItems?: {
+        name: string;
+        qty: number;
+        image: string;
+        price: number;
+        product: string;
+    }[];
 }
 
 interface Booking {
@@ -73,7 +92,8 @@ export function Admin() {
     const [loadingHelp, setLoadingHelp] = useState(true);
     const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
-    // Chat states
+    // Chat & Modal states
+    const [viewingOrderDetails, setViewingOrderDetails] = useState<Order | null>(null);
     const [selectedOrderChat, setSelectedOrderChat] = useState<Order | null>(null);
     const [selectedBookingChat, setSelectedBookingChat] = useState<Booking | null>(null);
     const [replyMessage, setReplyMessage] = useState('');
@@ -307,6 +327,11 @@ export function Admin() {
                                                 ) : (
                                                     <span className="text-red-500 text-xs font-bold w-4 h-4 mx-auto block">X</span>
                                                 )}
+                                                {order.paymentDetails?.transactionId && (
+                                                    <div className="text-[10px] text-gray-400 font-mono mt-2 tracking-widest bg-white/5 rounded px-1 py-0.5 inline-block">
+                                                        UTR: {order.paymentDetails.transactionId}
+                                                    </div>
+                                                )}
                                             </td>
 
                                             <td className="px-6 py-4 text-center">
@@ -399,6 +424,12 @@ export function Admin() {
                                                         className="px-3 py-1.5 rounded text-[10px] font-bold tracking-wider uppercase transition-colors border w-full border-blue-500/30 text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 flex justify-center items-center gap-1"
                                                     >
                                                         <MessageSquare className="h-3 w-3" /> Chat ({order.replies?.length || 0})
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setViewingOrderDetails(order)}
+                                                        className="px-3 py-1.5 rounded text-[10px] font-bold tracking-wider uppercase transition-colors border w-full border-green-500/30 text-green-400 bg-green-500/10 hover:bg-green-500/20 flex justify-center items-center gap-1 mt-2"
+                                                    >
+                                                        View Details
                                                     </button>
                                                 </div>
                                             </td>
@@ -647,6 +678,127 @@ export function Admin() {
                                         <Send className="h-5 w-5" />
                                     </button>
                                 </form>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Order Details Modal */}
+            <AnimatePresence>
+                {viewingOrderDetails && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
+                        >
+                            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-white/5">
+                                <div>
+                                    <h3 className="text-xl font-medium text-white mb-1">Order Details</h3>
+                                    <p className="text-xs font-mono text-gray-400">ID: {viewingOrderDetails._id}</p>
+                                </div>
+                                <button onClick={() => setViewingOrderDetails(null)} className="text-gray-400 hover:text-white transition-colors">
+                                    <CloseIcon className="h-6 w-6" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                                {/* Grid for Info */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {/* Customer & Shipping */}
+                                    <div className="space-y-6">
+                                        <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
+                                            <h4 className="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Customer Details</h4>
+                                            <p className="text-white font-medium">{viewingOrderDetails.user?.name}</p>
+                                            <p className="text-gray-400 text-sm mt-1">{viewingOrderDetails.user?.email}</p>
+                                        </div>
+
+                                        {viewingOrderDetails.shippingAddress && (
+                                            <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
+                                                <h4 className="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Shipping Address</h4>
+                                                <p className="text-white text-sm">{viewingOrderDetails.shippingAddress.address}</p>
+                                                <p className="text-gray-400 text-sm mt-1">{viewingOrderDetails.shippingAddress.city}, {viewingOrderDetails.shippingAddress.postalCode}</p>
+                                                <p className="text-gray-400 text-sm mt-1">{viewingOrderDetails.shippingAddress.country}</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Payment & Status */}
+                                    <div className="space-y-6">
+                                        <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
+                                            <h4 className="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Payment Info</h4>
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-gray-400 text-sm">Method:</span>
+                                                <span className="text-white font-medium bg-primary/20 text-primary px-2 py-0.5 rounded text-xs">{viewingOrderDetails.paymentMethod || 'Unknown'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-gray-400 text-sm">Status:</span>
+                                                <span className={`text-xs font-bold px-2 py-0.5 rounded ${viewingOrderDetails.isPaid ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                                    {viewingOrderDetails.isPaid ? 'PAID' : 'PENDING'}
+                                                </span>
+                                            </div>
+
+                                            {/* Render specific payment details based on method */}
+                                            {viewingOrderDetails.paymentDetails && (
+                                                <div className="mt-4 pt-4 border-t border-white/10">
+                                                    {viewingOrderDetails.paymentMethod === 'UPI' && viewingOrderDetails.paymentDetails.transactionId && (
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-gray-400 text-sm">Transaction UTR:</span>
+                                                            <span className="text-white font-mono text-sm tracking-wider">{viewingOrderDetails.paymentDetails.transactionId}</span>
+                                                        </div>
+                                                    )}
+                                                    {viewingOrderDetails.paymentMethod === 'Credit/Debit Card' && viewingOrderDetails.paymentDetails.cardNumberLast4 && (
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-gray-400 text-sm">Card Number:</span>
+                                                            <span className="text-white font-mono text-sm tracking-wider">**** **** **** {viewingOrderDetails.paymentDetails.cardNumberLast4}</span>
+                                                        </div>
+                                                    )}
+                                                    {viewingOrderDetails.paymentMethod === 'Net Banking' && viewingOrderDetails.paymentDetails.bank && (
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-gray-400 text-sm">Bank Name:</span>
+                                                            <span className="text-white text-sm">{viewingOrderDetails.paymentDetails.bank}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="bg-white/5 border border-white/10 p-4 rounded-xl flex items-center justify-between">
+                                            <div>
+                                                <p className="text-gray-400 text-sm mb-1">Total Order Value</p>
+                                                <p className="text-2xl font-serif text-primary">₹{viewingOrderDetails.totalPrice.toLocaleString('en-IN')}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-gray-400 text-sm mb-1">Order Date</p>
+                                                <p className="text-white font-medium">{new Date(viewingOrderDetails.createdAt).toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Order Items List */}
+                                {viewingOrderDetails.orderItems && viewingOrderDetails.orderItems.length > 0 && (
+                                    <div className="bg-white/5 border border-white/10 p-4 rounded-xl mt-6">
+                                        <h4 className="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Purchased Items</h4>
+                                        <div className="space-y-4">
+                                            {viewingOrderDetails.orderItems.map((item, idx) => (
+                                                <div key={idx} className="flex items-center gap-4 bg-black/30 p-3 rounded-lg border border-white/5">
+                                                    <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded bg-white/5" />
+                                                    <div className="flex-1">
+                                                        <h5 className="text-white font-medium">{item.name}</h5>
+                                                        <p className="text-gray-400 text-sm">Qty: {item.qty}</p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-primary font-medium">₹{(item.price * item.qty).toLocaleString('en-IN')}</p>
+                                                        {item.qty > 1 && <p className="text-gray-500 text-xs">₹{item.price.toLocaleString('en-IN')} each</p>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
                     </div>

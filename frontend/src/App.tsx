@@ -21,6 +21,7 @@ import { Services } from './pages/Services';
 import { Help } from './pages/Help';
 import { MyTickets } from './pages/MyTickets';
 import { Preloader } from './components/Preloader';
+import { AIAssistant } from './components/AIAssistant';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const GOOGLE_CLIENT_ID = '814018488714-87d3t4dl34tanodc42jm558gqajfdp39.apps.googleusercontent.com';
@@ -61,6 +62,7 @@ function App() {
         </main>
         <Footer />
         <MobileNav />
+        <AIAssistant />
       </div>
     </GoogleOAuthProvider>
   );

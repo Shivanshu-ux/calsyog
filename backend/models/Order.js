@@ -27,12 +27,14 @@ const orderSchema = new mongoose.Schema({
     paymentMethod: {
         type: String,
         required: true,
-        enum: ['Credit/Debit Card', 'UPI', 'Cash on Delivery'],
+        enum: ['Credit/Debit Card', 'UPI', 'Cash on Delivery', 'Net Banking'],
     },
     paymentDetails: {
-        // Optional details for mocking
+        // Optional details for various payment methods
         upiId: { type: String },
+        transactionId: { type: String },
         cardNumberLast4: { type: String },
+        bank: { type: String },
     },
     totalPrice: {
         type: Number,

@@ -7,6 +7,7 @@ import cartRoutes from './routes/cart.js';
 import orderRoutes from './routes/orders.js';
 import bookingRoutes from './routes/bookings.js';
 import helpRoutes from './routes/help.js';
+import aiRoutes from './routes/ai.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,6 +24,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/help', helpRoutes);
 import notificationRoutes from './routes/notifications.js';
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/ai', aiRoutes);
 
 // MongoDB Connection
 console.log('Starting MongoDB connection with URI:', process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 20) + '...' : 'undefined');
@@ -35,3 +37,4 @@ app.listen(PORT, () => {
 });
 
 // Force restart 3
+// Triggering server restart to load new Gemini API Key
