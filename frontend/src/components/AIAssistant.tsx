@@ -84,11 +84,11 @@ export function AIAssistant() {
             <AnimatePresence>
                 {!isOpen && (
                     <motion.button
-                        initial={{ scale: 0, opacity: 0 }}
+                        initial={{ scale: 1, opacity: 1 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0, opacity: 0 }}
                         onClick={() => setIsOpen(true)}
-                        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[100] bg-primary text-black p-4 rounded-full shadow-2xl hover:bg-primary/90 transition-colors"
+                        className="fixed bottom-20 right-6 md:bottom-10 md:right-10 z-[9999] bg-primary text-black p-4 rounded-full shadow-[0_0_20px_rgba(var(--primary),0.5)] hover:bg-primary/90 transition-all hover:scale-110"
                     >
                         <MessageSquare className="h-6 w-6" />
                     </motion.button>
