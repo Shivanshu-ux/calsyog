@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { CreditCard, Wallet, Banknote, ShieldCheck, QrCode, Landmark } from 'lucide-react';
+import { CreditCard, Banknote, ShieldCheck, QrCode, Landmark } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { SEO } from '../components/SEO';
 

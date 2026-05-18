@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { cn } from '../lib/utils';
@@ -84,11 +84,12 @@ export function AIAssistant() {
             <AnimatePresence>
                 {!isOpen && (
                     <motion.button
+                        key="ai-fab"
                         initial={{ scale: 1, opacity: 1 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0, opacity: 0 }}
                         onClick={() => setIsOpen(true)}
-                        className="fixed bottom-20 right-6 md:bottom-10 md:right-10 z-[9999] bg-primary text-black p-4 rounded-full shadow-[0_0_20px_rgba(var(--primary),0.5)] hover:bg-primary/90 transition-all hover:scale-110"
+                        className="fixed bottom-24 right-6 md:bottom-10 md:right-10 z-[9999] bg-primary text-black p-4 rounded-full shadow-lg shadow-primary/50 hover:bg-primary/90 transition-all hover:scale-110"
                     >
                         <MessageSquare className="h-6 w-6" />
                     </motion.button>
@@ -99,11 +100,12 @@ export function AIAssistant() {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
+                        key="ai-window"
                         initial={{ opacity: 0, y: 50, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 50, scale: 0.95 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[100] w-[calc(100vw-3rem)] md:w-96 bg-[#111] border border-white/10 rounded-2xl shadow-2xl flex flex-col h-[500px] max-h-[80vh] overflow-hidden"
+                        className="fixed bottom-24 right-6 md:bottom-10 md:right-10 z-[9999] w-[calc(100vw-3rem)] md:w-96 bg-[#111] border border-white/10 rounded-2xl shadow-2xl flex flex-col h-[500px] max-h-[80vh] overflow-hidden"
                     >
                         {/* Header */}
                         <div className="bg-white/5 border-b border-white/10 p-4 flex justify-between items-center">
