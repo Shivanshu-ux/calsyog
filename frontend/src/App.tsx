@@ -26,7 +26,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 const GOOGLE_CLIENT_ID = '814018488714-87d3t4dl34tanodc42jm558gqajfdp39.apps.googleusercontent.com';
 
 function App() {
-  const [isPreloading, setIsPreloading] = useState(true);
+  const isBot = /bot|googlebot|crawler|spider|robot|crawling/i.test(navigator.userAgent);
+  const [isPreloading, setIsPreloading] = useState(!isBot);
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>

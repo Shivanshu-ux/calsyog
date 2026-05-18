@@ -17,7 +17,6 @@ interface Notification {
 }
 
 export function Navbar() {
-export function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -197,8 +196,6 @@ export function Navbar() {
                                 )}
                             </button>
                         )}
-                    </div>
-
                     </div>
                 </div>
             </div>

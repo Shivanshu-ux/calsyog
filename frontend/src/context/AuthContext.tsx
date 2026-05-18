@@ -25,7 +25,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Check for saved user in localStorage when app loads
         const savedUser = localStorage.getItem('user');
         if (savedUser) {
-            setUser(JSON.parse(savedUser));
+            const parsedUser = JSON.parse(savedUser);
+            setUser(parsedUser);
+            // Re-apply the authorization header for subsequent axios requests
+            axios.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.token}`;
         }
     }, []);
 

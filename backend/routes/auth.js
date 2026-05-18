@@ -25,7 +25,7 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'Please provide all required fields' });
         }
 
-        const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
         }
@@ -35,7 +35,7 @@ router.post('/register', async (req, res) => {
 
         const user = await User.create({
             name,
-            email,
+            email: email.toLowerCase(),
             password: hashedPassword,
         });
 
@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
 
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
@@ -115,8 +115,8 @@ router.post('/external-login', async (req, res) => {
 
         const { email, name, sub: googleId } = payload;
 
-        // Find User by email
-        let user = await User.findOne({ email });
+        // Find User by email case-insensitively
+        let user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
 
         if (user) {
             // User exists, just update googleId if not present (optional)
@@ -135,7 +135,7 @@ router.post('/external-login', async (req, res) => {
             // New user
             user = await User.create({
                 name: name || '',
-                email: email,
+                email: email.toLowerCase(),
                 googleId: googleId,
             });
 

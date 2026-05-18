@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { CreditCard, Wallet, Banknote, ShieldCheck } from 'lucide-react';
+import { CreditCard, Wallet, Banknote, ShieldCheck, QrCode, Landmark } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { SEO } from '../components/SEO';
 
@@ -26,6 +26,8 @@ export function Checkout() {
         expiry: '',
         cvv: '',
         upiId: '',
+        transactionId: '',
+        bank: '',
     });
 
     useEffect(() => {
@@ -90,16 +92,17 @@ export function Checkout() {
                 paymentMethod,
                 paymentDetails: paymentMethod === 'Credit/Debit Card'
                     ? { cardNumberLast4: paymentDetails.cardNumber.slice(-4) }
-                    : paymentMethod === 'UPI' ? { upiId: paymentDetails.upiId } : {},
+                    : paymentMethod === 'UPI' ? { transactionId: paymentDetails.transactionId }
+                    : paymentMethod === 'Net Banking' ? { bank: paymentDetails.bank } : {},
                 totalPrice: finalTotal,
             };
 
-            if (paymentMethod === 'Cash on Delivery') {
-                // Direct checkout for COD
+            if (['Cash on Delivery', 'UPI', 'Net Banking'].includes(paymentMethod)) {
+                // Direct checkout for COD, UPI (manual verification), Net Banking (mocked)
                 await axios.post('/api/orders', orderData, config);
                 navigate('/success');
             } else {
-                // Razorpay Flow for Card / UPI
+                // Razorpay Flow for Card
                 const res = await loadRazorpay();
                 if (!res) {
                     alert('Razorpay SDK failed to load. Are you online?');
@@ -268,8 +271,15 @@ export function Checkout() {
                                                     required
                                                     type="text"
                                                     placeholder="0000 0000 0000 0000"
+                                                    minLength={16}
+                                                    maxLength={19}
+                                                    pattern="[\d\s]+"
                                                     value={paymentDetails.cardNumber}
-                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, cardNumber: e.target.value })}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value.replace(/\D/g, '');
+                                                        const formatted = val.replace(/(.{4})/g, '$1 ').trim();
+                                                        setPaymentDetails({ ...paymentDetails, cardNumber: formatted.substring(0, 19) });
+                                                    }}
                                                     className="w-full bg-black/50 border border-white/10 rounded-none px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors font-mono tracking-widest text-sm"
                                                 />
                                                 <div className="grid grid-cols-2 gap-4">
@@ -277,17 +287,27 @@ export function Checkout() {
                                                         required
                                                         type="text"
                                                         placeholder="MM/YY"
+                                                        maxLength={5}
+                                                        pattern="(0[1-9]|1[0-2])\/?([0-9]{2})"
                                                         value={paymentDetails.expiry}
-                                                        onChange={(e) => setPaymentDetails({ ...paymentDetails, expiry: e.target.value })}
+                                                        onChange={(e) => {
+                                                            let val = e.target.value.replace(/\D/g, '');
+                                                            if (val.length >= 2) {
+                                                                val = val.substring(0, 2) + '/' + val.substring(2, 4);
+                                                            }
+                                                            setPaymentDetails({ ...paymentDetails, expiry: val });
+                                                        }}
                                                         className="w-full bg-black/50 border border-white/10 rounded-none px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors font-mono uppercase"
                                                     />
                                                     <input
                                                         required
                                                         type="password"
                                                         placeholder="CVV"
+                                                        minLength={3}
                                                         maxLength={4}
+                                                        pattern="\d{3,4}"
                                                         value={paymentDetails.cvv}
-                                                        onChange={(e) => setPaymentDetails({ ...paymentDetails, cvv: e.target.value })}
+                                                        onChange={(e) => setPaymentDetails({ ...paymentDetails, cvv: e.target.value.replace(/\D/g, '') })}
                                                         className="w-full bg-black/50 border border-white/10 rounded-none px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors font-mono"
                                                     />
                                                 </div>
@@ -309,19 +329,68 @@ export function Checkout() {
                                                 onChange={(e) => setPaymentMethod(e.target.value)}
                                                 className="accent-primary"
                                             />
-                                            <Wallet className={cn("h-5 w-5", paymentMethod === 'UPI' ? "text-primary" : "text-gray-400")} />
+                                            <QrCode className={cn("h-5 w-5", paymentMethod === 'UPI' ? "text-primary" : "text-gray-400")} />
                                             <span className="text-white font-medium">UPI</span>
                                         </div>
                                         {paymentMethod === 'UPI' && (
+                                            <div className="mt-4 pl-8 flex flex-col items-center animate-in fade-in slide-in-from-top-2">
+                                                <div className="bg-white p-3 rounded-lg mb-3 shadow-lg">
+                                                    <img src="/qr.jpeg" alt="Store QR Code" className="w-48 h-48 object-contain" />
+                                                </div>
+                                                <p className="text-white text-lg font-bold mb-4 tracking-wider">Amount to Pay: <span className="text-primary">₹{finalTotal.toLocaleString('en-IN')}</span></p>
+                                                <div className="w-full">
+                                                    <label className="block text-sm font-medium text-gray-400 mb-1">Transaction ID / UTR</label>
+                                                    <input
+                                                        required
+                                                        type="text"
+                                                        placeholder="Enter 12-digit UTR number"
+                                                        minLength={12}
+                                                        maxLength={12}
+                                                        pattern="\d{12}"
+                                                        title="Please enter a valid 12-digit UTR number"
+                                                        value={paymentDetails.transactionId || ''}
+                                                        onChange={(e) => setPaymentDetails({ ...paymentDetails, transactionId: e.target.value.replace(/\D/g, '') })}
+                                                        className="w-full bg-black/50 border border-white/10 rounded-none px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors tracking-widest font-mono text-center"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </label>
+
+                                    {/* Net Banking Option */}
+                                    <label className={cn(
+                                        "flex flex-col p-4 border rounded-lg cursor-pointer transition-all",
+                                        paymentMethod === 'Net Banking' ? "border-primary bg-primary/5" : "border-white/10 hover:border-white/30"
+                                    )}>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="radio"
+                                                name="payment"
+                                                value="Net Banking"
+                                                checked={paymentMethod === 'Net Banking'}
+                                                onChange={(e) => setPaymentMethod(e.target.value)}
+                                                className="accent-primary"
+                                            />
+                                            <Landmark className={cn("h-5 w-5", paymentMethod === 'Net Banking' ? "text-primary" : "text-gray-400")} />
+                                            <span className="text-white font-medium">Net Banking</span>
+                                        </div>
+                                        {paymentMethod === 'Net Banking' && (
                                             <div className="mt-4 pl-8 animate-in fade-in slide-in-from-top-2">
-                                                <input
+                                                <select
                                                     required
-                                                    type="text"
-                                                    placeholder="username@upi"
-                                                    value={paymentDetails.upiId}
-                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, upiId: e.target.value })}
-                                                    className="w-full bg-black/50 border border-white/10 rounded-none px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors"
-                                                />
+                                                    value={paymentDetails.bank || ''}
+                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, bank: e.target.value })}
+                                                    className="w-full bg-black/50 border border-white/10 rounded-none px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors cursor-pointer appearance-none"
+                                                >
+                                                    <option value="" disabled>Select your Bank</option>
+                                                    <option value="HDFC">HDFC Bank</option>
+                                                    <option value="SBI">State Bank of India</option>
+                                                    <option value="ICICI">ICICI Bank</option>
+                                                    <option value="Axis">Axis Bank</option>
+                                                    <option value="Kotak">Kotak Mahindra Bank</option>
+                                                    <option value="PNB">Punjab National Bank</option>
+                                                    <option value="BOB">Bank of Baroda</option>
+                                                </select>
                                             </div>
                                         )}
                                     </label>
