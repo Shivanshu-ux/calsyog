@@ -40,9 +40,18 @@ Example Response 2:
 
 Remember: ONLY use the navigation command if the user is looking for a specific page. If they are just asking a question (e.g., "What is yoga?"), just answer the question normally without a command.`;
 
+import Setting from '../models/Setting.js';
+
 router.post('/chat', async (req, res) => {
     try {
-        const apiKey = process.env.GEMINI_API_KEY;
+        let apiKey = process.env.GEMINI_API_KEY;
+        
+        // If not in env (e.g. live production server), try fetching from database
+        if (!apiKey) {
+            const dbKey = await Setting.findOne({ key: 'GEMINI_API_KEY' });
+            if (dbKey) apiKey = dbKey.value;
+        }
+
         if (!apiKey) {
             return res.status(500).json({ 
                 error: "GEMINI_API_KEY is not configured on the server. Please add it to your backend .env file." 
